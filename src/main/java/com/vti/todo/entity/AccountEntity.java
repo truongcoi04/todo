@@ -6,9 +6,8 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
-
-@Entity
 @Data
+@Entity
 @Table(name = "accounts")
 public class AccountEntity {
     @Id

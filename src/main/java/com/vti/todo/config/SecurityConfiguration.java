@@ -32,8 +32,14 @@ public class SecurityConfiguration {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeHttpRequests()
-                .antMatchers(HttpMethod.POST, "/accounts/login", "/accounts/register",
+                .antMatchers("/departments",
+                        "/accounts/login",
+                        "/accounts/register").permitAll()
+                .antMatchers(HttpMethod.POST,
+//                        "/accounts/login",
                 "/accounts/forgot", "/accounts/forgot/**").permitAll()
+                // cho phép các URL có methor POST truy cập vào không cần authentication
+
                 .anyRequest()
                 .authenticated()
                 .and()

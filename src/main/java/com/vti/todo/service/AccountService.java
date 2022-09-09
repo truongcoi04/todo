@@ -5,7 +5,6 @@ import com.vti.todo.dto.request.RegisterAccountRequest;
 import com.vti.todo.dto.request.ResetPasswordRequest;
 import com.vti.todo.dto.response.AccountResponse;
 import com.vti.todo.dto.response.JwtResponse;
-import com.vti.todo.dto.response.TaskResponse;
 import com.vti.todo.entity.AccountEntity;
 import com.vti.todo.entity.Department;
 import com.vti.todo.entity.OtpAccount;
@@ -15,22 +14,21 @@ import com.vti.todo.repository.OtpAccountRepository;
 import com.vti.todo.security.JwtTokenProvider;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
+
 import java.security.SecureRandom;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -52,15 +50,6 @@ public class AccountService {
     @Autowired
     private SendMailService sendMailService;
 
-
-//    public AccountEntity registerNewAccount(RegisterAccountRequest registerAccountRequest) {
-//        AccountEntity account = new AccountEntity();
-//        account.setEmail(registerAccountRequest.getEmail());
-//        account.setPassword(registerAccountRequest.getPassword());
-//        account.setFullName(registerAccountRequest.getFullName());
-//        accountRepository.save(account);
-//        return account;
-//    }
 
     public JwtResponse login(LoginRequest loginRequest) {
         try {
@@ -121,6 +110,7 @@ public class AccountService {
         return accountRepository.searchAccount(departmentId, role, search, pageable);
     }
 
+
     public ResponseEntity registerNewAccount(RegisterAccountRequest registerAccountRequest) {
         AccountEntity account = new AccountEntity();
         account.setEmail(registerAccountRequest.getEmail());
@@ -132,25 +122,47 @@ public class AccountService {
         account.setDepartment(department);
         account.setCreatedDate(LocalDateTime.now());
         accountRepository.save(account);
+
+        Department department1 = new Department();
+        department1.setName("Nhân Viên");
+        departmentRepository.save(department1);
         return ResponseEntity.ok().build();
     }
 
 
-    public Optional<AccountEntity> updateAccount(Integer id, AccountResponse accountResponse) {
+
+
+
+
+    public AccountResponse updateAccount(Integer id, AccountResponse accountResponse) {
         Optional<AccountEntity> account = accountRepository.findById(id);
-        account.ifPresent(acc -> {
-            acc.setRole(accountResponse.getRole());
+
+        if (account.isPresent()){
+            AccountEntity account1 = account.get();
+
             Department referenceById = departmentRepository.getReferenceById(accountResponse.getDepartmentId());
-            acc.setDepartment(referenceById);
-            accountRepository.save(acc);
-        });
-        return account;
+            account1.setDepartment(referenceById);
+            account1.setRole(accountResponse.getRole());
+            accountRepository.save(account1);
+
+            AccountResponse response = new AccountResponse();
+            BeanUtils.copyProperties(account1, response);
+            return response;
+        }
+        return null;
     }
 
 
+    public Optional<AccountEntity> deleteAccount(Integer id) {
+        Optional<AccountEntity> account = accountRepository.findById(id);
+        account.ifPresent(account1 -> accountRepository.delete(account1));
+        return account;
+    }
 
     public void deleteAccounts(List<Integer> id) {
         accountRepository.deleteById(id);
     }
+
+
 
 }

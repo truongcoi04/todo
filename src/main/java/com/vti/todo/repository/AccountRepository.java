@@ -13,33 +13,32 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AccountRepository extends JpaRepository<AccountEntity, Integer> {
 
-    @Query("SELECT (count(a) = 0) from AccountEntity a where a.email = :email")
+    @Query("SELECT (count(a) = 0) from AccountEntity a where a.email = :email")    // SQL
     boolean isEmailNotExists(String email);
 
 
     AccountEntity findByEmail(String email);
 
-//    @Modifying
-//    @Transactional
-//    @Query("DELETE FROM accounts WHERE id = :id")
-//    void deleteById(@Param("id") List<Integer> id);
+
+
+    @Query (value = "select * " +
+            "from accounts " +
+            "where (:search is null OR (full_name like :search or email like :search)) " +
+            "AND (:role is null OR role = :role) " +
+            "AND (:departmentId is null OR department_id = :departmentId) " +
+            "ORDER BY created_date DESC " , nativeQuery = true)
+    Page<AccountEntity> searchAccount(Integer departmentId, String role, String search, Pageable pageable);
+
 
     @Modifying
     @Transactional
-    @Query("DELETE FROM Account WHERE id IN(:id)")
+    @Query("DELETE FROM AccountEntity WHERE id IN(:id)")  //HQL trong hibernate
     void deleteById(@Param("id") List<Integer> id);
-
-
-
-    @Query(value = "select * from accounts where (:search is null or (full_name like :search of email like :search))" +
-            " and (:role is null or role = :role) " +
-            "and (:departmentId is null or department_id = :departmentId) order by created_date desc", nativeQuery = true)
-    Page<AccountEntity> searchAccount(Integer departmentId, String role, String search, Pageable pageable);
-
 
 
 }

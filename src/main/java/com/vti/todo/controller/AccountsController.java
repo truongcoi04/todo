@@ -30,13 +30,6 @@ public class AccountsController {
     private AccountService accountService;
 
 
-
-
-//    @PostMapping("/register")
-//    public AccountEntity registerNewAccount(@Valid @RequestBody RegisterAccountRequest registerAccountRequest) {
-//        return accountService.registerNewAccount(registerAccountRequest);
-//    }
-
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
     public JwtResponse login(@Valid @RequestBody LoginRequest loginRequest) {
@@ -74,18 +67,31 @@ public class AccountsController {
         return accountService.searchAccount(departmentId, role, search, pageable);
     }
 
-    //update account
+    //update account - role + department
     @PreAuthorize("hasRole('ADMIN')")
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public Optional<AccountEntity> updateAccount(@PathVariable Integer id, @RequestBody @Valid AccountResponse accountResponse) {
+    public AccountResponse updateAccount(@PathVariable Integer id, @RequestBody @Valid AccountResponse accountResponse) {
         return accountService.updateAccount(id, accountResponse);
     }
 
+
+    //    delete 1 account
+    @PreAuthorize("hasRole('ADMIN')")
+    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+    public Optional<AccountEntity> deleteAccount(@PathVariable(name = "id") Integer id) {
+        return accountService.deleteAccount(id);
+    }
+
+
     //delete nhiêu account/1 lượt
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping
     public void deleteAccounts(@RequestParam(name = "id") List<Integer> id) {
         accountService.deleteAccounts(id);
     }
+
+
+
 
 
 

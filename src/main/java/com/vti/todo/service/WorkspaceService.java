@@ -52,7 +52,6 @@ public class WorkspaceService {
 //        return response;
 //    }
 
-
     public List<WorkspaceResponse> getCurrentWorkspace() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
